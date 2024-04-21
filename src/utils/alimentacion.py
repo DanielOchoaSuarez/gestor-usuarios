@@ -13,7 +13,7 @@ URL_OBTENER_PLAN_ALIMENTICIO = URL_GESTOR_PLAN_ALIMENTICIO + \
     '/gestor-plan-alimenticio/alimentacion/obtener_plan'
 
 
-def obtener_plan_alimenticio(id_plan: str) -> dict:
+def obtener_plan_alimenticio(id_plan: str):
     logger.info(
         f'Obteniendo plan alimenticio con id {id_plan}')
     try:

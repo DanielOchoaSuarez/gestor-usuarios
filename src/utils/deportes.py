@@ -12,7 +12,7 @@ URL_OBTENER_PLAN_DEPORTIVO = URL_GESTOR_DEPORTES + \
     '/gestor-deportes/deportes/obtener_plan'
 
 
-def obtener_plan_deportivo(id_plan: str) -> dict:
+def obtener_plan_deportivo(id_plan: str):
     logger.info(
         f'Obteniendo plan deportivo con id {id_plan}')
     try:

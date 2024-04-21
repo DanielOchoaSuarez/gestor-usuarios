@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 
 class ObtenerPlanesDeportivos(BaseCommand):
     def __init__(self):
-        pass
+        '''
+        Constructor para el comando ObtenerPlanesDeportivos
+        '''
 
     def execute(self):
         logger.info('Obteniendo todos los planes deportivos')
