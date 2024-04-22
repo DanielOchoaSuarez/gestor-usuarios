@@ -55,6 +55,7 @@ class ObtenerPlanesDeportista(BaseCommand):
                     alimentos.append(p)
 
             resp_tmp = {
+                'id_plan': plan.plan.id,
                 'nombre_plan': plan.plan.nombre,
                 'vo2': plan.plan.vo2,
                 'descripcion': plan.plan.descripcion,
