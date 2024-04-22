@@ -2,6 +2,8 @@ import os
 import logging
 import requests
 
+from src.errors.errors import SesionYaAgendada
+
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,15 @@ def agendar_sesion(id_plan_deportista: str, fecha_sesion: str):
             return data['result']
         else:
             logger.error('1 Error agendando sesion plan deportista')
+            logger.error(response.status_code)
+            logger.error(response.text)
+            if response.status_code == 400 and 'sesion_ya_agendada' in response.text:
+                raise SesionYaAgendada
+
             return None
+
+    except SesionYaAgendada:
+        raise SesionYaAgendada
 
     except Exception as e:
         logger.error('2 Error agendando sesion plan deportista' + str(e))
