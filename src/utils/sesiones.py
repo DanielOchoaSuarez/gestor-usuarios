@@ -3,6 +3,7 @@ import logging
 import requests
 
 from src.errors.errors import SesionYaAgendada
+from src.utils.seguridad_utils import UsuarioToken
 
 
 logger = logging.getLogger(__name__)
@@ -15,16 +16,19 @@ URL_REGISTRAR_SESION = URL_GESTOR_SESIONES + \
     '/gestor-sesion-deportiva/sesiones/agendar_sesion'
 
 
-def agendar_sesion(id_plan_deportista: str, fecha_sesion: str):
+def agendar_sesion(usuario_token: UsuarioToken, id_plan_deportista: str, fecha_sesion: str):
     logger.info(
         f'Agendando sesion plan deportista {id_plan_deportista} en fecha {fecha_sesion}')
     try:
+        headers = {
+            'Authorization': usuario_token.token_bearer,
+        }
         body = {
             'id_plan_deportista': id_plan_deportista,
             'fecha_sesion': fecha_sesion
         }
         response = requests.post(
-            url=URL_REGISTRAR_SESION, json=body)
+            url=URL_REGISTRAR_SESION, headers=headers, json=body)
 
         if response.status_code == 200:
             data = response.json()

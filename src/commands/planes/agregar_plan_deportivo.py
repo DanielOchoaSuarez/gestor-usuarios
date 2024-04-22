@@ -7,6 +7,7 @@ from src.errors.errors import BadRequest, ErrorAgendandoSesion
 from src.models.db import db_session
 from src.models.deportista import Deportista
 from src.models.plan_deportista import PlanDeportista
+from src.utils.seguridad_utils import UsuarioToken
 from src.utils.sesiones import agendar_sesion
 from src.utils.str_utils import str_none_or_empty
 
@@ -15,9 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 class AgregarPlanDeportivo(BaseCommand):
-    def __init__(self, info: dict):
+    def __init__(self, usuario_token: UsuarioToken, info: dict):
         logger.info(
             'Agregar plan deportivo a usuario deportista')
+
+        self.usuario_token: UsuarioToken = usuario_token
 
         if str_none_or_empty(info.get('email')):
             logger.error("email no puede ser vacio o nulo")
@@ -69,8 +72,8 @@ class AgregarPlanDeportivo(BaseCommand):
             db_session.commit()
             logger.info(f'Plan deportivo creado {plan_deportista.id}')
 
-        sesion = agendar_sesion(
-            str(plan_deportista.id), str(self.fecha_sesion))
+        sesion = agendar_sesion(self.usuario_token,
+                                str(plan_deportista.id), str(self.fecha_sesion))
 
         if sesion is None:
             logger.error(

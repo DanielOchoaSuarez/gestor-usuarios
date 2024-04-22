@@ -41,5 +41,5 @@ def agregar_plan_deportivo(usuario_token: UsuarioToken):
         'fecha_sesion': body.get('fecha_sesion', None),
     }
 
-    result = AgregarPlanDeportivo(info).execute()
+    result = AgregarPlanDeportivo(usuario_token, info).execute()
     return make_response(jsonify(result), 200)

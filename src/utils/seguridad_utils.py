@@ -43,6 +43,7 @@ def token_required(func):
 
                 logger.info('Token valido')
                 usuario = UsuarioToken(
+                    token_bearer=token_bearer,
                     email=data['email']
                 )
             else:
@@ -82,5 +83,6 @@ def get_token(email: str):
 
 
 class UsuarioToken():
-    def __init__(self, email: str):
+    def __init__(self, token_bearer: str, email: str):
+        self.token_bearer = token_bearer
         self.email = email
