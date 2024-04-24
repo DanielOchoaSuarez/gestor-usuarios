@@ -32,7 +32,7 @@ class AgregarPlanDeportivo(BaseCommand):
 
         fecha_sesion = None
         if str_none_or_empty(info.get('fecha_sesion')):
-            logger.error("Petición sin fecha de sesión")
+            logger.info("Petición sin fecha de sesión")
         else:
             fecha_sesion = parser.parse(info.get('fecha_sesion'))
             fecha_sistema = datetime.datetime.now()

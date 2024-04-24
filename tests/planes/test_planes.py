@@ -143,3 +143,80 @@ class TestPlanes():
             assert len(response_json) > 0
             assert 'alimentos' in response_json[0]
             assert 'ejercicios' in response_json[0]
+
+    @patch('requests.post')
+    def test_agregar_plan_deportivo(self, mock_post, setup_data):
+        with app.test_client() as test_client:
+            deportista: Deportista = setup_data['deportista']
+            plan = {
+                'nombre': fake.name(),
+                'descripcion': fake.name(),
+                'vo2': fake.random_int(min=1, max=70)
+            }
+            plan_random: Plan = Plan(**plan)
+            db_session.add(plan_random)
+            db_session.commit()
+
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                'token_valido': True, 'email': deportista.email}
+            mock_post.return_value = mock_response
+
+            headers = {'Authorization': 'Bearer 123'}
+            body = {
+                'id_plan': plan_random.id,
+            }
+            response = test_client.post(
+                '/gestor-usuarios/planes/agregar_plan_deportivo', headers=headers, json=body, follow_redirects=True)
+            response_json = json.loads(response.data)
+
+            assert response.status_code == 200
+            assert 'id_plan_deportista' in response_json
+
+            plan_deportista = PlanDeportista.query.filter_by(
+                id=response_json['id_plan_deportista']).first()
+
+            db_session.delete(plan_deportista)
+            db_session.delete(plan_random)
+            db_session.commit()
+
+    @patch('requests.post')
+    def test_agregar_plan_deportivo_sin_email(self, mock_post, setup_data):
+        with app.test_client() as test_client:
+            plan: Deportista = setup_data['plan']
+
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                'token_valido': True, 'email': None}
+            mock_post.return_value = mock_response
+
+            headers = {'Authorization': 'Bearer 123'}
+            body = {
+                'id_plan': plan.id,
+            }
+            response = test_client.post(
+                '/gestor-usuarios/planes/agregar_plan_deportivo', headers=headers, json=body, follow_redirects=True)
+
+            assert response.status_code == 400
+
+    @patch('requests.post')
+    def test_agregar_plan_deportivo_sin_id_plan(self, mock_post, setup_data):
+        with app.test_client() as test_client:
+            deportista: Deportista = setup_data['deportista']
+
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                'token_valido': True, 'email': deportista.email}
+            mock_post.return_value = mock_response
+
+            headers = {'Authorization': 'Bearer 123'}
+            body = {
+                'id_plan': None,
+            }
+            response = test_client.post(
+                '/gestor-usuarios/planes/agregar_plan_deportivo', headers=headers, json=body, follow_redirects=True)
+
+            assert response.status_code == 400
