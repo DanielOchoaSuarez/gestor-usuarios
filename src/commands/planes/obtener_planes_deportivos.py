@@ -33,6 +33,7 @@ class ObtenerPlanesDeportivos(BaseCommand):
                 ejercicios.append(p)
 
             resp_tmp = {
+                'id_plan': plan.id,
                 'nombre_plan': plan.nombre,
                 'vo2': plan.vo2,
                 'descripcion': plan.descripcion,
