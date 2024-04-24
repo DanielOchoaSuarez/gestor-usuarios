@@ -30,16 +30,17 @@ class AgregarPlanDeportivo(BaseCommand):
             logger.error("El plan no puede ser vacio o nulo")
             raise BadRequest
 
+        fecha_sesion = None
         if str_none_or_empty(info.get('fecha_sesion')):
-            logger.error("La fecha de sesion no puede ser vacia o nula")
-            raise BadRequest
+            logger.error("Petición sin fecha de sesión")
+        else:
+            fecha_sesion = parser.parse(info.get('fecha_sesion'))
+            fecha_sistema = datetime.datetime.now()
 
-        fecha_sesion = parser.parse(info.get('fecha_sesion'))
-        fecha_sistema = datetime.datetime.now()
-        if fecha_sesion.date() < fecha_sistema.date():
-            logger.error(
-                "La fecha de sesion no puede ser menor a la fecha actual")
-            raise BadRequest
+            if fecha_sesion.date() < fecha_sistema.date():
+                logger.error(
+                    "La fecha de sesion no puede ser menor a la fecha actual")
+                raise BadRequest
 
         self.email = info.get('email')
         self.id_plan = info.get('id_plan')
@@ -72,17 +73,19 @@ class AgregarPlanDeportivo(BaseCommand):
             db_session.commit()
             logger.info(f'Plan deportivo creado {plan_deportista.id}')
 
-        sesion = agendar_sesion(self.usuario_token,
-                                str(plan_deportista.id), str(self.fecha_sesion))
-
-        if sesion is None:
-            logger.error(
-                f"Error agendando sesion para plan deportista {plan_deportista.id}")
-            raise ErrorAgendandoSesion
-
         resp = {
             'id_plan_deportista': plan_deportista.id,
-            'sesion': sesion
         }
+
+        if self.fecha_sesion is not None:
+            sesion = agendar_sesion(self.usuario_token,
+                                    str(plan_deportista.id), str(self.fecha_sesion))
+
+            if sesion is None:
+                logger.error(
+                    f"Error agendando sesion para plan deportista {plan_deportista.id}")
+                raise ErrorAgendandoSesion
+
+            resp['sesion'] = sesion
 
         return resp
