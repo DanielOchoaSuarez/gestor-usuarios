@@ -14,7 +14,7 @@ class PerfilDeportivo(Model, Base):
     VO2max_actual = Column(Float)
     FTP_actual = Column(Float)
     lesion_molestia_incapacidad = Column(Boolean)
-    detalle_lesion_molestia_incapacidad = Column(String(50))
+    detalle_lesion_molestia_incapacidad = Column(String(200))
 
     deportista: Mapped['Deportista'] = relationship("Deportista", backref="perfil_deportivo")
 

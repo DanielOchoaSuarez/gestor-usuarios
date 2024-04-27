@@ -28,11 +28,17 @@ class AgregarPerfilDeportivo(BaseCommand):
     def execute(self):
         deportista: Deportista = Deportista.query.filter_by(email=self.usuario_token.email).first()
 
+        if self.info.get('dias_semana_practica') == "" or self.info.get('tiempo_practica') == "" or self.info.get('VO2max_actual') == "" or self.info.get('FTP_actual') == "" or self.info.get('lesion_molestia_incapacidad') == "" or self.info.get('detalle_lesion_molestia_incapacidad') == "":
+            logger.error("Información invalida")
+            raise BadRequest
+
+        # Validar que la información no sea vacía
         if deportista is None:
             logger.error("Deportista No Existe")
             raise BadRequest
         else:
             logger.info(f"Registrando Perfil Deportivo: {deportista.email}")
+
             record = PerfilDeportivo(id_deportista=deportista.id,
                                                  dias_semana_practica=self.info.get('dias_semana_practica'),
                                                  tiempo_practica=self.info.get('tiempo_practica'),

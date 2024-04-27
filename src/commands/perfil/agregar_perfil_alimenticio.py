@@ -32,6 +32,10 @@ class AgregarPerfilAlimenticio(BaseCommand):
     def execute(self):
         deportista: Deportista = Deportista.query.filter_by(email=self.usuario_token.email).first()
 
+        if self.info.get('intorelancia_alergia') == "" or self.info.get('detalle_intolerancia_alergia') == "" or self.info.get('vegano') == "" or self.info.get('objetivo_peso') == "":
+            logger.error("Información invalida")
+            raise BadRequest
+    
         if deportista is None:
             logger.error("Deportista No Existe")
             raise BadRequest

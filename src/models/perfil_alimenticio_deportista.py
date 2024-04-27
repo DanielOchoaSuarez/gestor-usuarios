@@ -11,7 +11,7 @@ class PerfilAlimenticioDeportista(Model, Base):
     __tablename__ = "perfil_alimenticio_deportista"
     id_deportista = Column(UUID(as_uuid=True), ForeignKey('deportista.id'), primary_key=True)
     intorelancia_alergia = Column(Boolean)
-    detalle_intolerancia_alergia = Column(String(50))
+    detalle_intolerancia_alergia = Column(String(200))
     vegano = Column(Boolean)
     objetivo_peso = Column(Float)
 
