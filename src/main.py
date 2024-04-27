@@ -6,6 +6,8 @@ from src.models.db import init_db
 from src.errors.errors import ApiError
 from src.blueprints.health_blueprint import health_blueprint
 from src.blueprints.planes_blueprint import planes_blueprint
+from src.blueprints.perfil_alimenticio import perfil_alimenticio_blueprint
+from src.blueprints.perfil_deportivo import perfil_deportivo_blueprint
 
 
 
@@ -27,6 +29,8 @@ init_db()
 PREFIJO = '/gestor-usuarios/'
 app.register_blueprint(health_blueprint, url_prefix=PREFIJO+'health')
 app.register_blueprint(planes_blueprint, url_prefix=PREFIJO+'planes')
+app.register_blueprint(perfil_alimenticio_blueprint, url_prefix=PREFIJO+'perfil-alimenticio')
+app.register_blueprint(perfil_deportivo_blueprint, url_prefix=PREFIJO+'perfil-deportivo')
 
 
 @app.errorhandler(ApiError)
