@@ -150,8 +150,7 @@ class TestPerfilDeportivo():
             response_json = json.loads(response.data)
 
             assert response.status_code == 200
-            #assert response_json['message'] == 'success'
-
+            
             db_session.delete(perfildeportivo)
             db_session.commit()
 
