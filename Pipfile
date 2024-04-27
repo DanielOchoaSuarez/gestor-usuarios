@@ -12,6 +12,7 @@ psycopg2 = "*"
 requests = "*"
 gunicorn = "*"
 PyJWT = "*"
+python-dateutil = "*"
 
 [dev-packages]
 faker = "*"
