@@ -225,7 +225,7 @@ class TestPlanes():
     def test_obtener_ejercicios_plan_deportista(self, mock_post, setup_data):
         with app.test_client() as test_client:
             deportista: Deportista = setup_data['deportista']
-            plan_deportista = PlanDeportista.query.filter_by(
+            plan_deportista: PlanDeportista = PlanDeportista.query.filter_by(
                 id_deportista=deportista.id).first()
 
             mock_response_1 = MagicMock()
@@ -251,7 +251,7 @@ class TestPlanes():
 
             headers = {'Authorization': 'Bearer 123'}
             response = test_client.get(
-                f'/gestor-usuarios/planes/obtener_ejercicios_plan_deportista/{plan_deportista.id}', headers=headers, follow_redirects=True)
+                f'/gestor-usuarios/planes/obtener_ejercicios_plan_deportista/{plan_deportista.id_plan}', headers=headers, follow_redirects=True)
             response_json = json.loads(response.data)
 
             assert response.status_code == 200
