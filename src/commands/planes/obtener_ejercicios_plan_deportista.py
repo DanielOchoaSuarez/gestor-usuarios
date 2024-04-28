@@ -15,8 +15,6 @@ logger = logging.getLogger(__name__)
 
 class ObtenerEjerciciosPlanDeportista(BaseCommand):
     def __init__(self, **info):
-        logger.info(
-            'Validando informacion para obtener ejercicios de un plan deportista')
 
         if str_none_or_empty(info.get('email')):
             logger.error("email no puede ser vacio o nulo")
@@ -31,7 +29,7 @@ class ObtenerEjerciciosPlanDeportista(BaseCommand):
 
     def execute(self):
         logger.info(
-            f'Obteniendo ejercicios del plan deportista {self.id_plan_deportista}')
+            f'Obteniendo ejercicios plan deportista {self.id_plan_deportista}')
 
         deportista: Deportista = Deportista.query.filter_by(
             email=self.email).first()
