@@ -35,7 +35,7 @@ class ObtenerEjerciciosPlanDeportista(BaseCommand):
             email=self.email).first()
 
         plan_deportista: PlanDeportista = PlanDeportista.query.filter_by(
-            id=self.id_plan_deportista,
+            id_plan=self.id_plan_deportista,
             id_deportista=deportista.id).first()
 
         if plan_deportista is None or plan_deportista.plan is None:
