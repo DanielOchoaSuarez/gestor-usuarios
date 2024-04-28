@@ -220,3 +220,47 @@ class TestPlanes():
                 '/gestor-usuarios/planes/agregar_plan_deportivo', headers=headers, json=body, follow_redirects=True)
 
             assert response.status_code == 400
+
+    @patch('requests.post')
+    def test_obtener_ejercicios_plan_deportista(self, mock_post, setup_data):
+        with app.test_client() as test_client:
+            deportista: Deportista = setup_data['deportista']
+            plan_deportista = PlanDeportista.query.filter_by(
+                id_deportista=deportista.id).first()
+
+            mock_response_1 = MagicMock()
+            mock_response_1.status_code = 200
+            mock_response_1.json.return_value = {
+                'token_valido': True, 'email': deportista.email}
+            mock_response_1.return_value = mock_response_1
+
+            plan_deportivo = {
+                "deporte_id": "730e0a96-7232-4377-a65c-71e33b818fe1",
+                "deporte_nombre": "Ciclismo",
+                "ejercicio_descripcion": "Mejora resistencia y fuerza en piernas.",
+                "ejercicio_duracion": 20,
+                "ejercicio_id": "28e9a795-afd4-488d-ad28-242d7e723b5e",
+                "ejercicio_nombre": "Pedaleo en Resistencia"
+            }
+            mock_response_2 = MagicMock()
+            mock_response_2.status_code = 200
+            mock_response_2.json.return_value = {'result': [plan_deportivo]}
+            mock_response_2.return_value = mock_response_2
+
+            mock_post.side_effect = [mock_response_1, mock_response_2]
+
+            headers = {'Authorization': 'Bearer 123'}
+            response = test_client.get(
+                f'/gestor-usuarios/planes/obtener_ejercicios_plan_deportista/{plan_deportista.id}', headers=headers, follow_redirects=True)
+            response_json = json.loads(response.data)
+
+            assert response.status_code == 200
+            assert len(response_json) > 0
+            assert 'ejercicios' in response_json
+
+    def test_obtener_ejercicios_plan_deportista_sin_token(self):
+        with app.test_client() as test_client:
+            response = test_client.get(
+                '/gestor-usuarios/planes/obtener_ejercicios_plan_deportista/123', follow_redirects=True)
+
+            assert response.status_code == 403
