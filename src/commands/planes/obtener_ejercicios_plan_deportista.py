@@ -38,6 +38,11 @@ class ObtenerEjerciciosPlanDeportista(BaseCommand):
             id=self.id_plan_deportista,
             id_deportista=deportista.id).first()
 
+        if plan_deportista is None or plan_deportista.plan is None:
+            logger.error(
+                f'Plan deportista no encontrado. id {self.id_plan_deportista}, email {self.email}')
+            return {}
+
         ejercicios = []
         tmp_deportes = obtener_plan_deportivo(str(plan_deportista.id_plan))
         if tmp_deportes is not None:
