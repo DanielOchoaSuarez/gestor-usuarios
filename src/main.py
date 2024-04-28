@@ -1,6 +1,7 @@
 import logging
 from dotenv import load_dotenv
 from flask import Flask, jsonify
+from flask_cors import CORS
 
 from src.models.db import init_db
 from src.errors.errors import ApiError
@@ -21,6 +22,9 @@ loaded = load_dotenv()
 
 # Crear instancia de Flask
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 
 # Inicializar base de datos
 init_db()

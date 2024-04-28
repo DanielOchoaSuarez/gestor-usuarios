@@ -13,6 +13,7 @@ requests = "*"
 gunicorn = "*"
 PyJWT = "*"
 python-dateutil = "*"
+flask-cors = "*"
 
 [dev-packages]
 faker = "*"
