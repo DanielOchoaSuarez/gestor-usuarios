@@ -9,6 +9,8 @@ from src.main import app
 from src.models.db import db_session
 from src.models.deportista import Deportista
 from src.models.perfil_deportivo import PerfilDeportivo
+from src.models.plan import Plan
+from src.models.plan_deportista import PlanDeportista
 from src.utils.seguridad_utils import UsuarioToken
 
 
@@ -43,11 +45,24 @@ def setup_data():
     db_session.commit()
     logger.info('Deportista creado: ' + deportista_random.email)
 
+    #Crear un plan
+    plan = {
+        'nombre': fake.name(),
+        'descripcion': fake.name(),
+        'vo2': fake.random_int(min=1, max=70)
+    }
+    plan_random: Plan = Plan(**plan)
+    db_session.add(plan_random)
+    db_session.commit()
+    logger.info('Plan creado: ' + plan_random.nombre)
+
     yield {
         'deportista': deportista_random,
+        'plan': plan_random
     }
 
     logger.info("Fin TestPlanes")
+    db_session.delete(plan_random)
     db_session.delete(deportista_random)
     db_session.commit()
 
@@ -86,8 +101,11 @@ class TestPerfilDeportivo():
             assert response.status_code == 200
             assert response_json['message'] == 'success'
 
+            plan_deportista = PlanDeportista.query.filter_by(id_deportista=deportista.id).first()
+            db_session.delete(plan_deportista)
+            db_session.commit()
+            
             perfil_deportivo: PerfilDeportivo = PerfilDeportivo.query.filter_by(id_deportista=deportista.id).first()
-
             db_session.delete(perfil_deportivo)
             db_session.commit()
 
