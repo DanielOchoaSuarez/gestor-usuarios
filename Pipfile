@@ -14,9 +14,9 @@ gunicorn = "*"
 PyJWT = "*"
 python-dateutil = "*"
 flask-cors = "*"
+faker = "*"
 
 [dev-packages]
-faker = "*"
 pytest = "*"
 pytest-cov = "*"
 pytest-mock = "*"
