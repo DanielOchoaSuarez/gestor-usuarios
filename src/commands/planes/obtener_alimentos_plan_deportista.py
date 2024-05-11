@@ -2,6 +2,7 @@ import logging
 
 
 from src.commands.base_command import BaseCommand
+from src.models.db import db_session
 from src.errors.errors import BadRequest
 from src.models.plan_deportista import PlanDeportista
 from src.utils.alimentacion import obtener_plan_alimenticio
@@ -25,22 +26,25 @@ class ObtenerAlimentosPlanDeportista(BaseCommand):
         logger.info(
             f'Obteniendo alimentos plan deportista {self.id_plan_deportista}')
 
-        plan_deportista: PlanDeportista = PlanDeportista.query.filter_by(
-            id=self.id_plan_deportista).first()
+        with db_session() as session:
 
-        if plan_deportista is None or plan_deportista.plan is None:
-            logger.error(
-                f'Plan deportista no encontrado. id {self.id_plan_deportista}')
-            return {'alimentos': []}
+            plan_deportista = session.query(PlanDeportista).filter(
+                PlanDeportista.id == self.id_plan_deportista).first()
 
-        alimentos = []
-        tmp_alimentos = obtener_plan_alimenticio(str(plan_deportista.id_plan))
-        if tmp_alimentos is not None:
-            for p in tmp_alimentos['result']:
-                alimentos.append(p)
+            if plan_deportista is None or plan_deportista.plan is None:
+                logger.error(
+                    f'Plan deportista no encontrado. id {self.id_plan_deportista}')
+                return {'alimentos': []}
 
-        resp_tmp = {
-            'alimentos': alimentos,
-        }
+            alimentos = []
+            tmp_alimentos = obtener_plan_alimenticio(
+                str(plan_deportista.id_plan))
+            if tmp_alimentos is not None:
+                for p in tmp_alimentos['result']:
+                    alimentos.append(p)
 
-        return resp_tmp
+            resp_tmp = {
+                'alimentos': alimentos,
+            }
+
+            return resp_tmp

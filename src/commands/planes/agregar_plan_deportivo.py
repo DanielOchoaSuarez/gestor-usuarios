@@ -47,45 +47,48 @@ class AgregarPlanDeportivo(BaseCommand):
         self.fecha_sesion = fecha_sesion
 
     def execute(self):
-        deportista: Deportista = Deportista.query.filter_by(
-            email=self.email).first()
 
-        planes = PlanDeportista.query.filter_by(
-            id_plan=self.id_plan,
-            id_deportista=deportista.id).all()
+        with db_session() as session:
 
-        plan_deportista: PlanDeportista
-        if len(planes) > 0:
-            logger.info(
-                f"El plan {self.id_plan} ya fue asignado al deportista {deportista.id}")
-            plan_deportista = planes[0]
-        else:
-            logger.info(
-                f"El plan {self.id_plan} no ha sido asignado al deportista {deportista.id}")
+            deportista: Deportista = Deportista.query.filter_by(
+                email=self.email).first()
 
-            plan = {
-                'id_plan': self.id_plan,
-                'id_deportista': deportista.id
+            planes = PlanDeportista.query.filter_by(
+                id_plan=self.id_plan,
+                id_deportista=deportista.id).all()
+
+            plan_deportista: PlanDeportista
+            if len(planes) > 0:
+                logger.info(
+                    f"El plan {self.id_plan} ya fue asignado al deportista {deportista.id}")
+                plan_deportista = planes[0]
+            else:
+                logger.info(
+                    f"El plan {self.id_plan} no ha sido asignado al deportista {deportista.id}")
+
+                plan = {
+                    'id_plan': self.id_plan,
+                    'id_deportista': deportista.id
+                }
+
+                plan_deportista = PlanDeportista(**plan)
+                session.add(plan_deportista)
+                session.commit()
+                logger.info(f'Plan deportivo creado {plan_deportista.id}')
+
+            resp = {
+                'id_plan_deportista': plan_deportista.id,
             }
 
-            plan_deportista = PlanDeportista(**plan)
-            db_session.add(plan_deportista)
-            db_session.commit()
-            logger.info(f'Plan deportivo creado {plan_deportista.id}')
+            if self.fecha_sesion is not None:
+                sesion = agendar_sesion(self.usuario_token,
+                                        str(plan_deportista.id), str(self.fecha_sesion))
 
-        resp = {
-            'id_plan_deportista': plan_deportista.id,
-        }
+                if sesion is None:
+                    logger.error(
+                        f"Error agendando sesion para plan deportista {plan_deportista.id}")
+                    raise ErrorAgendandoSesion
 
-        if self.fecha_sesion is not None:
-            sesion = agendar_sesion(self.usuario_token,
-                                    str(plan_deportista.id), str(self.fecha_sesion))
+                resp['sesion'] = sesion
 
-            if sesion is None:
-                logger.error(
-                    f"Error agendando sesion para plan deportista {plan_deportista.id}")
-                raise ErrorAgendandoSesion
-
-            resp['sesion'] = sesion
-
-        return resp
+            return resp

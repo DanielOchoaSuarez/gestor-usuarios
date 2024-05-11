@@ -1,6 +1,7 @@
 import logging
 
 from src.commands.base_command import BaseCommand
+from src.models.db import db_session
 from src.models.plan import Plan
 from src.utils.deportes import obtener_plan_deportivo
 
@@ -16,29 +17,31 @@ class ObtenerPlanesDeportivos(BaseCommand):
 
     def execute(self):
         logger.info('Obteniendo todos los planes deportivos')
-        planes_bd = Plan.query.all()
 
-        if planes_bd is None or len(planes_bd) == 0:
-            logger.error("No existen planes deportivos configurados")
-            return []
+        with db_session() as session:
+            planes_bd = session.query(Plan).all()
 
-        respuesta = []
+            if planes_bd is None or len(planes_bd) == 0:
+                logger.error("No existen planes deportivos configurados")
+                return []
 
-        plan: Plan
-        for plan in planes_bd:
-            tmp = obtener_plan_deportivo(str(plan.id))
+            respuesta = []
 
-            ejercicios = []
-            for p in tmp['result']:
-                ejercicios.append(p)
+            plan: Plan
+            for plan in planes_bd:
+                tmp = obtener_plan_deportivo(str(plan.id))
 
-            resp_tmp = {
-                'id_plan': plan.id,
-                'nombre_plan': plan.nombre,
-                'vo2': plan.vo2,
-                'descripcion': plan.descripcion,
-                'ejercicios': ejercicios,
-            }
-            respuesta.append(resp_tmp)
+                ejercicios = []
+                for p in tmp['result']:
+                    ejercicios.append(p)
 
-        return respuesta
+                resp_tmp = {
+                    'id_plan': plan.id,
+                    'nombre_plan': plan.nombre,
+                    'vo2': plan.vo2,
+                    'descripcion': plan.descripcion,
+                    'ejercicios': ejercicios,
+                }
+                respuesta.append(resp_tmp)
+
+            return respuesta
