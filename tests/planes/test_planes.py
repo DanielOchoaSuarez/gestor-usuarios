@@ -68,6 +68,7 @@ def setup_data():
     yield {
         'plan': plan_random,
         'deportista': deportista_random,
+        'id_plan_deportista_random': plan_deportista_random.id,
     }
 
     logger.info("Fin TestPlanes")
@@ -264,3 +265,32 @@ class TestPlanes():
                 '/gestor-usuarios/planes/obtener_ejercicios_plan_deportista/123', follow_redirects=True)
 
             assert response.status_code == 403
+
+    def test_obtener_alimentos_plan_sin_id_plan(self):
+        with app.test_client() as test_client:
+            response = test_client.get(
+                '/gestor-usuarios/planes/obtener_alimentos_plan/', follow_redirects=True)
+
+            assert response.status_code == 404
+
+    def test_obtener_alimentos_plan_no_existe(self):
+        with app.test_client() as test_client:
+            uuid_rnd = uuid.uuid4()
+
+            response = test_client.get(
+                f'/gestor-usuarios/planes/obtener_alimentos_plan/{uuid_rnd}', follow_redirects=True)
+            response_json = json.loads(response.data)
+
+            assert response.status_code == 200
+            assert 'alimentos' in response_json
+
+    def test_obtener_alimentos_plan_exitoso(self, setup_data):
+        with app.test_client() as test_client:
+            id_plan_deportista = setup_data['id_plan_deportista_random']
+
+            response = test_client.get(
+                f'/gestor-usuarios/planes/obtener_alimentos_plan/{id_plan_deportista}', follow_redirects=True)
+            response_json = json.loads(response.data)
+
+            assert response.status_code == 200
+            assert 'alimentos' in response_json
