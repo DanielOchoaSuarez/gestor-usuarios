@@ -2,6 +2,7 @@ import logging
 
 from flask import Blueprint, jsonify, make_response, request
 from src.commands.planes.agregar_plan_deportivo import AgregarPlanDeportivo
+from src.commands.planes.obtener_alimentos_plan_deportista import ObtenerAlimentosPlanDeportista
 from src.commands.planes.obtener_ejercicios_plan_deportista import ObtenerEjerciciosPlanDeportista
 from src.commands.planes.obtener_planes_deportivos import ObtenerPlanesDeportivos
 from src.commands.planes.obtener_planes_deportista import ObtenerPlanesDeportista
@@ -55,4 +56,14 @@ def obtener_ejercicios_plan_deportist(usuario_token: UsuarioToken, id_plan_depor
         'id_plan_deportista': id_plan_deportista,
     }
     result = ObtenerEjerciciosPlanDeportista(**info).execute()
+    return make_response(jsonify(result), 200)
+
+
+@planes_blueprint.route('/obtener_alimentos_plan/<id_plan_deportista>', methods=['GET'])
+def obtener_alimentos_plan(id_plan_deportista: str = None):
+    logger.info('Obteniendo alimentos por id plan deportista')
+    info = {
+        'id_plan_deportista': id_plan_deportista,
+    }
+    result = ObtenerAlimentosPlanDeportista(**info).execute()
     return make_response(jsonify(result), 200)
