@@ -3,6 +3,7 @@ import logging
 
 from src.commands.base_command import BaseCommand
 from src.errors.errors import BadRequest
+from src.models.db import db_session
 from src.models.deportista import Deportista
 from src.models.plan import Plan
 from src.models.plan_deportista import PlanDeportista
@@ -31,31 +32,33 @@ class ObtenerEjerciciosPlanDeportista(BaseCommand):
         logger.info(
             f'Obteniendo ejercicios plan deportista {self.id_plan_deportista}')
 
-        deportista: Deportista = Deportista.query.filter_by(
-            email=self.email).first()
+        with db_session() as session:
 
-        plan_deportista: PlanDeportista = PlanDeportista.query.filter_by(
-            id_plan=self.id_plan_deportista,
-            id_deportista=deportista.id).first()
+            deportista: Deportista = session.query(
+                Deportista).filter_by(email=self.email).first()
 
-        if plan_deportista is None or plan_deportista.plan is None:
-            logger.error(
-                f'Plan deportista no encontrado. id {self.id_plan_deportista}, email {self.email}')
-            return {}
+            plan_deportista: PlanDeportista = session.query(PlanDeportista).filter_by(
+                id_plan=self.id_plan_deportista,
+                id_deportista=deportista.id).first()
 
-        ejercicios = []
-        tmp_deportes = obtener_plan_deportivo(str(plan_deportista.id_plan))
-        if tmp_deportes is not None:
-            for p in tmp_deportes['result']:
-                ejercicios.append(p)
+            if plan_deportista is None or plan_deportista.plan is None:
+                logger.error(
+                    f'Plan deportista no encontrado. id {self.id_plan_deportista}, email {self.email}')
+                return {}
 
-        plan: Plan = plan_deportista.plan
-        resp_tmp = {
-            'id_plan': plan.id,
-            'nombre_plan': plan.nombre,
-            'vo2': plan.vo2,
-            'descripcion': plan.descripcion,
-            'ejercicios': ejercicios,
-        }
+            ejercicios = []
+            tmp_deportes = obtener_plan_deportivo(str(plan_deportista.id_plan))
+            if tmp_deportes is not None:
+                for p in tmp_deportes['result']:
+                    ejercicios.append(p)
 
-        return resp_tmp
+            plan: Plan = plan_deportista.plan
+            resp_tmp = {
+                'id_plan': plan.id,
+                'nombre_plan': plan.nombre,
+                'vo2': plan.vo2,
+                'descripcion': plan.descripcion,
+                'ejercicios': ejercicios,
+            }
+
+            return resp_tmp

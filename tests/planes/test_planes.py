@@ -10,7 +10,6 @@ from src.models.db import db_session
 from src.models.deportista import Deportista
 from src.models.plan import Plan
 from src.models.plan_deportista import PlanDeportista
-from src.utils.seguridad_utils import UsuarioToken
 
 
 fake = Faker()
@@ -21,61 +20,65 @@ logger = logging.getLogger(__name__)
 def setup_data():
     logger.info("Inicio TestPlanes")
 
-    # Crear plan
-    plan = {
-        'nombre': fake.name(),
-        'descripcion': fake.name(),
-        'vo2': fake.random_int(min=1, max=70)
-    }
-    plan_random: Plan = Plan(**plan)
-    db_session.add(plan_random)
-    db_session.commit()
-    logger.info('Plan creado: ' + plan_random.nombre)
+    with db_session() as session:
+        # Crear plan
+        plan = {
+            'nombre': fake.name(),
+            'descripcion': fake.name(),
+            'vo2': fake.random_int(min=1, max=70)
+        }
+        plan_random: Plan = Plan(**plan)
+        session.add(plan_random)
+        session.commit()
+        logger.info('Plan creado: ' + plan_random.nombre)
 
-    # Crear deportista
-    deportista = {
-        'nombre': fake.name(),
-        'apellido': fake.name(),
-        'tipo_identificacion': 'cedula_ciudadania',
-        'numero_identificacion': fake.random_int(min=100000000, max=999999999),
-        'email': fake.email(),
-        'genero': 'masculino',
-        'edad': fake.random_int(min=18, max=60),
-        'peso': fake.random_int(min=50, max=100),
-        'altura': fake.random_int(min=150, max=200),
-        'pais_nacimiento': 'Colombia',
-        'ciudad_nacimiento': 'Bogota',
-        'pais_residencia': 'Colombia',
-        'ciudad_residencia': 'Bogota',
-        'antiguedad_residencia': fake.random_int(min=1, max=10),
-        'contrasena': fake.password(),
-    }
-    deportista_random: Deportista = Deportista(**deportista)
-    db_session.add(deportista_random)
-    db_session.commit()
-    logger.info('Deportista creado: ' + deportista_random.email)
+        # Crear deportista
+        deportista = {
+            'nombre': fake.name(),
+            'apellido': fake.name(),
+            'tipo_identificacion': 'cedula_ciudadania',
+            'numero_identificacion': fake.random_int(min=100000000, max=999999999),
+            'email': fake.email(),
+            'genero': 'masculino',
+            'edad': fake.random_int(min=18, max=60),
+            'peso': fake.random_int(min=50, max=100),
+            'altura': fake.random_int(min=150, max=200),
+            'pais_nacimiento': 'Colombia',
+            'ciudad_nacimiento': 'Bogota',
+            'pais_residencia': 'Colombia',
+            'ciudad_residencia': 'Bogota',
+            'antiguedad_residencia': fake.random_int(min=1, max=10),
+            'contrasena': fake.password(),
+        }
+        deportista_random: Deportista = Deportista(**deportista)
+        session.add(deportista_random)
+        session.commit()
+        logger.info('Deportista creado: ' + deportista_random.email)
 
-    # Crear plan deportista
-    plan_deportista = {
-        'id_deportista': deportista_random.id,
-        'id_plan': plan_random.id,
-    }
-    plan_deportista_random: PlanDeportista = PlanDeportista(**plan_deportista)
-    db_session.add(plan_deportista_random)
-    db_session.commit()
-    logger.info('Plan deportista creado: ' + str(plan_deportista_random.id))
+        # Crear plan deportista
+        plan_deportista = {
+            'id_deportista': deportista_random.id,
+            'id_plan': plan_random.id,
+        }
+        plan_deportista_random: PlanDeportista = PlanDeportista(
+            **plan_deportista)
+        session.add(plan_deportista_random)
+        session.commit()
+        logger.info('Plan deportista creado: ' +
+                    str(plan_deportista_random.id))
 
-    yield {
-        'plan': plan_random,
-        'deportista': deportista_random,
-        'id_plan_deportista_random': plan_deportista_random.id,
-    }
+        yield {
+            'plan_id': plan_random.id,
+            'deportista_email': deportista_random.email,
+            'deportista_id': deportista_random.id,
+            'id_plan_deportista_random': plan_deportista_random.id,
+        }
 
-    logger.info("Fin TestPlanes")
-    db_session.delete(plan_deportista_random)
-    db_session.delete(deportista_random)
-    db_session.delete(plan_random)
-    db_session.commit()
+        logger.info("Fin TestPlanes")
+        session.delete(plan_deportista_random)
+        session.delete(deportista_random)
+        session.delete(plan_random)
+        session.commit()
 
 
 @pytest.mark.usefixtures("setup_data")
@@ -111,12 +114,12 @@ class TestPlanes():
     @patch('requests.post')
     def test_obtener_planes_deportista(self, mock_post, setup_data):
         with app.test_client() as test_client:
-            deportista: Deportista = setup_data['deportista']
+            deportista_email = setup_data['deportista_email']
 
             mock_response_1 = MagicMock()
             mock_response_1.status_code = 200
             mock_response_1.json.return_value = {
-                'token_valido': True, 'email': deportista.email}
+                'token_valido': True, 'email': deportista_email}
             mock_response_1.return_value = mock_response_1
 
             plan_deportivo = {
@@ -148,7 +151,7 @@ class TestPlanes():
     @patch('requests.post')
     def test_agregar_plan_deportivo(self, mock_post, setup_data):
         with app.test_client() as test_client:
-            deportista: Deportista = setup_data['deportista']
+            deportista_email = setup_data['deportista_email']
             plan = {
                 'nombre': fake.name(),
                 'descripcion': fake.name(),
@@ -161,7 +164,7 @@ class TestPlanes():
             mock_response = MagicMock()
             mock_response.status_code = 200
             mock_response.json.return_value = {
-                'token_valido': True, 'email': deportista.email}
+                'token_valido': True, 'email': deportista_email}
             mock_post.return_value = mock_response
 
             headers = {'Authorization': 'Bearer 123'}
@@ -185,7 +188,7 @@ class TestPlanes():
     @patch('requests.post')
     def test_agregar_plan_deportivo_sin_email(self, mock_post, setup_data):
         with app.test_client() as test_client:
-            plan: Deportista = setup_data['plan']
+            plan_id = setup_data['plan_id']
 
             mock_response = MagicMock()
             mock_response.status_code = 200
@@ -195,7 +198,7 @@ class TestPlanes():
 
             headers = {'Authorization': 'Bearer 123'}
             body = {
-                'id_plan': plan.id,
+                'id_plan': plan_id,
             }
             response = test_client.post(
                 '/gestor-usuarios/planes/agregar_plan_deportivo', headers=headers, json=body, follow_redirects=True)
@@ -205,12 +208,12 @@ class TestPlanes():
     @patch('requests.post')
     def test_agregar_plan_deportivo_sin_id_plan(self, mock_post, setup_data):
         with app.test_client() as test_client:
-            deportista: Deportista = setup_data['deportista']
+            deportista_email = setup_data['deportista_email']
 
             mock_response = MagicMock()
             mock_response.status_code = 200
             mock_response.json.return_value = {
-                'token_valido': True, 'email': deportista.email}
+                'token_valido': True, 'email': deportista_email}
             mock_post.return_value = mock_response
 
             headers = {'Authorization': 'Bearer 123'}
@@ -225,14 +228,16 @@ class TestPlanes():
     @patch('requests.post')
     def test_obtener_ejercicios_plan_deportista(self, mock_post, setup_data):
         with app.test_client() as test_client:
-            deportista: Deportista = setup_data['deportista']
+            deportista_email = setup_data['deportista_email']
+            deportista_id = setup_data['deportista_id']
+
             plan_deportista: PlanDeportista = PlanDeportista.query.filter_by(
-                id_deportista=deportista.id).first()
+                id_deportista=deportista_id).first()
 
             mock_response_1 = MagicMock()
             mock_response_1.status_code = 200
             mock_response_1.json.return_value = {
-                'token_valido': True, 'email': deportista.email}
+                'token_valido': True, 'email': deportista_email}
             mock_response_1.return_value = mock_response_1
 
             plan_deportivo = {
