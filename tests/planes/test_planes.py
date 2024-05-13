@@ -257,7 +257,7 @@ class TestPlanes():
 
             headers = {'Authorization': 'Bearer 123'}
             response = test_client.get(
-                f'/gestor-usuarios/planes/obtener_ejercicios_plan_deportista/{plan_deportista.id_plan}', headers=headers, follow_redirects=True)
+                f'/gestor-usuarios/planes/obtener_ejercicios_plan_deportista/{plan_deportista.id_plan}/123456', headers=headers, follow_redirects=True)
             response_json = json.loads(response.data)
 
             assert response.status_code == 200
@@ -267,7 +267,7 @@ class TestPlanes():
     def test_obtener_ejercicios_plan_deportista_sin_token(self):
         with app.test_client() as test_client:
             response = test_client.get(
-                '/gestor-usuarios/planes/obtener_ejercicios_plan_deportista/123', follow_redirects=True)
+                '/gestor-usuarios/planes/obtener_ejercicios_plan_deportista/123/123456', follow_redirects=True)
 
             assert response.status_code == 403
 

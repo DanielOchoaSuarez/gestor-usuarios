@@ -27,6 +27,7 @@ class ObtenerEjerciciosPlanDeportista(BaseCommand):
 
         self.email = info.get('email')
         self.id_plan_deportista = info.get('id_plan_deportista')
+        self.id_sesion = info.get('id_sesion')
 
     def execute(self):
         logger.info(
@@ -55,6 +56,7 @@ class ObtenerEjerciciosPlanDeportista(BaseCommand):
             plan: Plan = plan_deportista.plan
             resp_tmp = {
                 'id_plan': plan.id,
+                'id_sesion': self.id_sesion,
                 'nombre_plan': plan.nombre,
                 'vo2': plan.vo2,
                 'descripcion': plan.descripcion,
