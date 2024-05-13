@@ -71,7 +71,7 @@ def obtener_alimentos_plan(id_plan_deportista: str = None):
     return make_response(jsonify(result), 200)
 
 
-@planes_blueprint.route('/obtener_alimentos_plan/<id_plan>', methods=['GET'])
+@planes_blueprint.route('/obtener_sugerencia_alimentos/<id_plan>', methods=['GET'])
 def obtener_sugerencia_alimentos(id_plan: str = None):
     logger.info('Obteniendo alimentos por id plan deportista')
     info = {
