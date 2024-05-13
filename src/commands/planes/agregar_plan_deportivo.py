@@ -50,10 +50,10 @@ class AgregarPlanDeportivo(BaseCommand):
 
         with db_session() as session:
 
-            deportista: Deportista = Deportista.query.filter_by(
+            deportista: Deportista = session.query(Deportista).filter_by(
                 email=self.email).first()
 
-            planes = PlanDeportista.query.filter_by(
+            planes = session.query(PlanDeportista).filter_by(
                 id_plan=self.id_plan,
                 id_deportista=deportista.id).all()
 
