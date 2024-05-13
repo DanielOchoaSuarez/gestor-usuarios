@@ -6,6 +6,7 @@ from src.commands.planes.obtener_alimentos_plan_deportista import ObtenerAliment
 from src.commands.planes.obtener_ejercicios_plan_deportista import ObtenerEjerciciosPlanDeportista
 from src.commands.planes.obtener_planes_deportivos import ObtenerPlanesDeportivos
 from src.commands.planes.obtener_planes_deportista import ObtenerPlanesDeportista
+from src.commands.planes.obtener_sugerencia_alimentos import ObtenerSugerenciaAlimentos
 from src.utils.seguridad_utils import UsuarioToken, token_required
 
 
@@ -67,4 +68,14 @@ def obtener_alimentos_plan(id_plan_deportista: str = None):
         'id_plan_deportista': id_plan_deportista,
     }
     result = ObtenerAlimentosPlanDeportista(**info).execute()
+    return make_response(jsonify(result), 200)
+
+
+@planes_blueprint.route('/obtener_alimentos_plan/<id_plan>', methods=['GET'])
+def obtener_sugerencia_alimentos(id_plan: str = None):
+    logger.info('Obteniendo alimentos por id plan deportista')
+    info = {
+        'id_plan': id_plan,
+    }
+    result = ObtenerSugerenciaAlimentos(**info).execute()
     return make_response(jsonify(result), 200)
