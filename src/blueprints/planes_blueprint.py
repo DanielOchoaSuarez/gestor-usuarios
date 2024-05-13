@@ -47,13 +47,14 @@ def agregar_plan_deportivo(usuario_token: UsuarioToken):
     return make_response(jsonify(result), 200)
 
 
-@planes_blueprint.route('/obtener_ejercicios_plan_deportista/<id_plan_deportista>', methods=['GET'])
+@planes_blueprint.route('/obtener_ejercicios_plan_deportista/<id_plan_deportista>/<id_sesion>', methods=['GET'])
 @token_required
-def obtener_ejercicios_plan_deportist(usuario_token: UsuarioToken, id_plan_deportista: str):
+def obtener_ejercicios_plan_deportist(usuario_token: UsuarioToken, id_plan_deportista: str, id_sesion: str):
     logger.info('Obteniendo todos los ejercicios deportivos')
     info = {
         'email': usuario_token.email,
         'id_plan_deportista': id_plan_deportista,
+        'id_sesion': id_sesion,
     }
     result = ObtenerEjerciciosPlanDeportista(**info).execute()
     return make_response(jsonify(result), 200)
