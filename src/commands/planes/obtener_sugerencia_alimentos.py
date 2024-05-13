@@ -38,7 +38,7 @@ class ObtenerSugerenciaAlimentos(BaseCommand):
 
             alimentos = []
             tmp_alimentos = obtener_plan_alimenticio(
-                str(plan_deportista.id))
+                str(plan_deportista.id_plan))
             if tmp_alimentos is not None:
                 for p in tmp_alimentos['result']:
                     alimentos.append(p)
