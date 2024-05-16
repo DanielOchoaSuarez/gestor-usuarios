@@ -10,7 +10,6 @@ from src.models.plan_deportista import PlanDeportista
 from src.utils.seguridad_utils import UsuarioToken
 from src.utils.str_utils import str_none_or_empty
 from faker import Faker
-from sqlalchemy import select
 
 
 logger = logging.getLogger(__name__)
@@ -55,20 +54,20 @@ class AgregarPerfilDeportivo(BaseCommand):
             db_session.commit()
 
             #Asignando un plan *deportivo y alimenticio al deportista
-            planDeportistaActual = PlanDeportista.query.filter_by(id_deportista=deportista.id).first()
-            if planDeportistaActual is None:
-                planTmp: Plan = Plan.query.all()
-                listaPlanes = len(planTmp)
-                if listaPlanes == 0:
+            plan_deportista_actual = PlanDeportista.query.filter_by(id_deportista=deportista.id).first()
+            if plan_deportista_actual is None:
+                plan_tmp: Plan = Plan.query.all()
+                lista_planes = len(plan_tmp)
+                if lista_planes == 0:
                     logger.error("No hay planes registrados")
                     raise BadRequest
                 else:
                     fake = Faker()
-                    indicaPlanSeleccionado = fake.random_int(min=0, max=(listaPlanes-1))
-                    planSeleccionado = planTmp[indicaPlanSeleccionado]
+                    indica_plan_seleccionado = fake.random_int(min=0, max=(lista_planes-1))
+                    plan_seleccionado = plan_tmp[indica_plan_seleccionado]
 
-                    recordPlanDeportista = PlanDeportista(id_deportista=deportista.id, id_plan=planSeleccionado.id)
-                    db_session.add(recordPlanDeportista)
+                    record_plan_deportista = PlanDeportista(id_deportista=deportista.id, id_plan=plan_seleccionado.id)
+                    db_session.add(record_plan_deportista)
                     db_session.commit()
 
             response = {
