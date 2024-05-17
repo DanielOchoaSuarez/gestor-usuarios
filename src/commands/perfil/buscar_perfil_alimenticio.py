@@ -1,9 +1,7 @@
-import datetime
 import logging
 
-from dateutil import parser
 from src.commands.base_command import BaseCommand
-from src.errors.errors import BadRequest, ErrorAgendandoSesion
+from src.errors.errors import BadRequest
 from src.models.db import db_session
 from src.models.deportista import Deportista
 from src.models.perfil_alimenticio_deportista import PerfilAlimenticioDeportista, PerfilAlimenticioDeportistaSchema
@@ -26,20 +24,25 @@ class BuscarPerfilAlimenticio(BaseCommand):
             logger.error("email no puede ser vacio o nulo")
             raise BadRequest
 
-
     def execute(self):
-        deportista: Deportista = Deportista.query.filter_by(email=self.usuario_token.email).first()
 
-        if deportista is None:
-            logger.error("Deportista No Existe")
-            raise BadRequest
-        else:
-            logger.info(f"Buscando Perfil Alimenticio: {deportista.email}")
-            perfil_alimenticio: PerfilAlimenticioDeportista = PerfilAlimenticioDeportista.query.filter_by(id_deportista=deportista.id).first()
+        with db_session() as session:
 
-            if perfil_alimenticio is None:
-                logger.error("Perfil Alimenticio No Existe")
+            deportista: Deportista = session.query(Deportista).filter(
+                Deportista.email == self.usuario_token.email).first()
+
+            if deportista is None:
+                logger.error("Deportista No Existe")
                 raise BadRequest
             else:
-                schema = PerfilAlimenticioDeportistaSchema()
-                return schema.dump(perfil_alimenticio)
+                logger.info(f"Buscando Perfil Alimenticio: {deportista.email}")
+
+                perfil_alimenticio: PerfilAlimenticioDeportista = session.query(PerfilAlimenticioDeportista).filter(
+                    PerfilAlimenticioDeportista.id_deportista == deportista.id).first()
+
+                if perfil_alimenticio is None:
+                    logger.error("Perfil Alimenticio No Existe")
+                    raise BadRequest
+                else:
+                    schema = PerfilAlimenticioDeportistaSchema()
+                    return schema.dump(perfil_alimenticio)
