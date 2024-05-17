@@ -22,37 +22,42 @@ class ActualizarPerfilDeportivo(BaseCommand):
         self.info = info
 
         self.usuario_token: UsuarioToken = usuario_token
-        
+
         if str_none_or_empty(info.get('email')):
             logger.error("email no puede ser vacio o nulo")
             raise BadRequest
 
-
     def execute(self):
-        deportista: Deportista = Deportista.query.filter_by(email=self.usuario_token.email).first()
+        with db_session() as session:
 
-        if deportista is None:
-            logger.error("Deportista No Existe")
-            raise BadRequest
-        else:
+            deportista: Deportista = session.query(Deportista).filter(
+                Deportista.email == self.usuario_token.email).first()
 
-            logger.info(f"Actualizando Perfil Deportivo: {deportista.email}")
-
-            perfil_deportivo: PerfilDeportivo = PerfilDeportivo.query.filter_by(id_deportista=deportista.id).first()
-            if perfil_deportivo is None:
-                logger.error("Perfil Deportivo No Existe")
+            if deportista is None:
+                logger.error("Deportista No Existe")
                 raise BadRequest
             else:
-                perfil_deportivo.dias_semana_practica = self.dias_semana_practica
-                perfil_deportivo.tiempo_practica = self.tiempo_practica
-                perfil_deportivo.VO2max_actual = self.VO2max_actual
-                perfil_deportivo.FTP_actual = self.FTP_actual                
-                perfil_deportivo.lesion_molestia_incapacidad = self.lesion_molestia_incapacidad
-                perfil_deportivo.detalle_lesion_molestia_incapacidad = self.detalle_lesion_molestia_incapacidad
 
-            db_session.commit()
-            response = {
-                'message': 'success'
-            }
+                logger.info(
+                    f"Actualizando Perfil Deportivo: {deportista.email}")
 
-        return response
+                perfil_deportivo: PerfilDeportivo = session.query(PerfilDeportivo).filter(
+                    PerfilDeportivo.id_deportista == deportista.id).first()
+
+                if perfil_deportivo is None:
+                    logger.error("Perfil Deportivo No Existe")
+                    raise BadRequest
+                else:
+                    perfil_deportivo.dias_semana_practica = self.dias_semana_practica
+                    perfil_deportivo.tiempo_practica = self.tiempo_practica
+                    perfil_deportivo.VO2max_actual = self.VO2max_actual
+                    perfil_deportivo.FTP_actual = self.FTP_actual
+                    perfil_deportivo.lesion_molestia_incapacidad = self.lesion_molestia_incapacidad
+                    perfil_deportivo.detalle_lesion_molestia_incapacidad = self.detalle_lesion_molestia_incapacidad
+
+                session.commit()
+                response = {
+                    'message': 'success'
+                }
+
+            return response

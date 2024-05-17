@@ -23,35 +23,40 @@ class ActualizarPerfilAlimenticio(BaseCommand):
         self.info = info
 
         self.usuario_token: UsuarioToken = usuario_token
-        
+
         if str_none_or_empty(info.get('email')):
             logger.error("email no puede ser vacio o nulo")
             raise BadRequest
 
-
     def execute(self):
-        deportista: Deportista = Deportista.query.filter_by(email=self.usuario_token.email).first()
+        with db_session() as session:
 
-        if deportista is None:
-            logger.error("Deportista No Existe")
-            raise BadRequest
-        else:
+            deportista: Deportista = session.query(Deportista).filter(
+                Deportista.email == self.usuario_token.email).first()
 
-            logger.info(f"Actualizando Perfil Alimenticio: {deportista.email}")
-
-            perfil_alimenticio: PerfilAlimenticioDeportista = PerfilAlimenticioDeportista.query.filter_by(id_deportista=deportista.id).first()
-            if perfil_alimenticio is None:
-                logger.error("Perfil Alimenticio No Existe")
+            if deportista is None:
+                logger.error("Deportista No Existe")
                 raise BadRequest
             else:
-                perfil_alimenticio.intorelancia_alergia = self.intorelancia_alergia
-                perfil_alimenticio.detalle_intolerancia_alergia = self.detalle_intolerancia_alergia
-                perfil_alimenticio.vegano = self.vegano
-                perfil_alimenticio.objetivo_peso = self.objetivo_peso
 
-            db_session.commit()
-            response = {
-                'message': 'success'
-            }
+                logger.info(
+                    f"Actualizando Perfil Alimenticio: {deportista.email}")
 
-        return response
+                perfil_alimenticio: PerfilAlimenticioDeportista = session.query(PerfilAlimenticioDeportista).filter(
+                    PerfilAlimenticioDeportista.id_deportista == deportista.id).first()
+
+                if perfil_alimenticio is None:
+                    logger.error("Perfil Alimenticio No Existe")
+                    raise BadRequest
+                else:
+                    perfil_alimenticio.intorelancia_alergia = self.intorelancia_alergia
+                    perfil_alimenticio.detalle_intolerancia_alergia = self.detalle_intolerancia_alergia
+                    perfil_alimenticio.vegano = self.vegano
+                    perfil_alimenticio.objetivo_peso = self.objetivo_peso
+
+                session.commit()
+                response = {
+                    'message': 'success'
+                }
+
+            return response
