@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class ActualizarPerfilDeportivo(BaseCommand):
     def __init__(self, usuario_token: UsuarioToken, info: dict):
         logger.info(
-            'Actualizar perfil alimenticio a usuario deportista')
+            'Actualizar perfil deportivo')
 
         super().__init__()
         self.__dict__.update(info)
